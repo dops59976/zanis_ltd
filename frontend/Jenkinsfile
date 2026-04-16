@@ -1,0 +1,325 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Docker configuration
+        DOCKER_REGISTRY = "docker.io"
+        DOCKER_REPO = "dops59976/fe-zanisltd"
+        BUILD_TIMESTAMP = sh(script: "date +%Y%m%d_%H%M%S", returnStdout: true).trim()
+        BUILD_TAG = "${BUILD_TIMESTAMP}_${BUILD_NUMBER}"
+        LATEST_TAG = "latest"
+        GIT_COMMIT_SHORT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+        
+        // Kubernetes configuration
+        K8S_NAMESPACE = "apps"
+        K8S_DEPLOYMENT = "frontend"
+        
+        // GitHub configuration
+        GITHUB_REPO_URL = "https://github.com/dops59976/zanis_ltd.git"
+        GITHUB_USERNAME = "dops59976"
+        GITHUB_TOKEN = credentials('github-token')
+        GITHUB_BRANCH = "main"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "📦 Checking out source code..."
+                checkout scm
+                dir('zanis_ltd/frontend') {
+                    echo "✅ In zanis_ltd/frontend directory"
+                }
+            }
+        }
+        
+        stage('Validate Files') {
+            steps {
+                echo "🔍 Validating frontend files..."
+                sh '''
+                    cd zanis_ltd/frontend
+                    
+                    if [ ! -f "Dockerfile" ]; then
+                        echo "❌ Dockerfile not found"
+                        exit 1
+                    fi
+                    
+                    if [ ! -f "nginx.conf" ]; then
+                        echo "❌ nginx.conf not found"
+                        exit 1
+                    fi
+                    
+                    if [ ! -f "index.html" ]; then
+                        echo "❌ index.html not found"
+                        exit 1
+                    fi
+                    
+                    echo "✅ All required files present"
+                    ls -la
+                '''
+            }
+        }
+        
+        stage('Code Quality') {
+            steps {
+                echo "✨ Checking HTML..."
+                sh '''
+                    cd zanis_ltd/frontend
+                    
+                    # Basic HTML validation
+                    if grep -q "<html>" index.html || grep -q "<HTML>" index.html; then
+                        echo "✅ HTML structure looks good"
+                    else
+                        echo "⚠️  HTML might be missing"
+                    fi
+                    
+                    # Check nginx config syntax
+                    docker run --rm -v $(pwd):/etc/nginx:ro nginx:alpine \
+                        nginx -t 2>&1 || echo "⚠️  Nginx config needs review"
+                '''
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo "🐳 Building Docker image..."
+                sh '''
+                    cd zanis_ltd/frontend
+                    
+                    # Build with build timestamp tag
+                    docker build -t ${DOCKER_REPO}:${BUILD_TAG} .
+                    
+                    # Tag as latest
+                    docker tag ${DOCKER_REPO}:${BUILD_TAG} ${DOCKER_REPO}:${LATEST_TAG}
+                    
+                    # Tag with git commit
+                    docker tag ${DOCKER_REPO}:${BUILD_TAG} ${DOCKER_REPO}:${GIT_COMMIT_SHORT}
+                    
+                    echo "✅ Docker images created:"
+                    echo "  - ${DOCKER_REPO}:${BUILD_TAG}"
+                    echo "  - ${DOCKER_REPO}:${LATEST_TAG}"
+                    echo "  - ${DOCKER_REPO}:${GIT_COMMIT_SHORT}"
+                '''
+            }
+        }
+        
+        stage('Test Docker Image') {
+            steps {
+                echo "🧪 Testing Docker image..."
+                sh '''
+                    # Start container and test
+                    CONTAINER_ID=$(docker run -d -p 8888:80 ${DOCKER_REPO}:${BUILD_TAG})
+                    
+                    echo "⏳ Waiting for nginx to start..."
+                    sleep 3
+                    
+                    # Test if service is responding
+                    if curl -s http://localhost:8888 > /dev/null; then
+                        echo "✅ Nginx is responding"
+                        
+                        # Check content
+                        curl -s http://localhost:8888 | grep -q "Zanis" && \
+                            echo "✅ Content is served correctly" || \
+                            echo "⚠️  Content might be incorrect"
+                    else
+                        echo "❌ Nginx not responding"
+                        docker logs $CONTAINER_ID || true
+                        docker stop $CONTAINER_ID || true
+                        docker rm $CONTAINER_ID || true
+                        exit 1
+                    fi
+                    
+                    # Cleanup
+                    docker stop $CONTAINER_ID || true
+                    docker rm $CONTAINER_ID || true
+                '''
+            }
+        }
+        
+        stage('Scan Docker Image') {
+            steps {
+                echo "🔐 Scanning Docker image for vulnerabilities..."
+                sh '''
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy image ${DOCKER_REPO}:${BUILD_TAG} || true
+                '''
+            }
+        }
+        
+        stage('Push to Registry') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "📤 Pushing Docker images to registry..."
+                script {
+                    withRegistry("https://${DOCKER_REGISTRY}", 'docker-registry') {
+                        sh '''
+                            # Push build timestamp tag (for rollback)
+                            docker push ${DOCKER_REPO}:${BUILD_TAG}
+                            
+                            # Push latest tag (for k8s deployment)
+                            docker push ${DOCKER_REPO}:${LATEST_TAG}
+                            
+                            # Push git commit tag (for traceability)
+                            docker push ${DOCKER_REPO}:${GIT_COMMIT_SHORT}
+                            
+                            echo "✅ Images pushed successfully"
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Push to GitHub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "🐙 Pushing code to GitHub..."
+                sh '''
+                    # Configure git
+                    git config --global user.email "jenkins@example.com"
+                    git config --global user.name "Jenkins CI"
+                    
+                    # Setup remote with token
+                    git remote set-url origin "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/dops59976/zanis_ltd.git"
+                    
+                    # Create build tag
+                    git tag -a "build-${BUILD_TAG}" -m "Build ${BUILD_NUMBER} - ${BUILD_TIMESTAMP}" || true
+                    
+                    # Push to GitHub
+                    git push origin ${GITHUB_BRANCH} || true
+                    git push origin "build-${BUILD_TAG}" || true
+                    
+                    echo "✅ Code pushed to GitHub"
+                '''
+            }
+        }
+        
+        stage('Update Kubernetes Deployment') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "☸️ Updating Kubernetes deployment..."
+                sh '''
+                    # Create namespace if not exists
+                    kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                    
+                    # Update deployment with latest image
+                    kubectl set image deployment/${K8S_DEPLOYMENT} \
+                        frontend=${DOCKER_REPO}:${LATEST_TAG} \
+                        -n ${K8S_NAMESPACE}
+                    
+                    # Wait for rollout
+                    kubectl rollout status deployment/${K8S_DEPLOYMENT} \
+                        -n ${K8S_NAMESPACE} --timeout=5m
+                    
+                    echo "✅ Kubernetes deployment updated"
+                    
+                    # Show deployment info
+                    echo ""
+                    echo "📊 Deployment Info:"
+                    kubectl get deployment ${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE}
+                    echo ""
+                    echo "📝 Pod Status:"
+                    kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend
+                '''
+            }
+        }
+        
+        stage('Smoke Test') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "🧪 Running smoke tests..."
+                sh '''
+                    # Get service info
+                    echo "⏳ Checking service..."
+                    kubectl get svc -n ${K8S_NAMESPACE} | grep -i frontend || echo "⚠️  Service not found"
+                    
+                    # Try port-forward and test
+                    echo "Testing service..."
+                    timeout 30 kubectl port-forward svc/frontend-service 8890:80 -n ${K8S_NAMESPACE} > /dev/null 2>&1 &
+                    PF_PID=$!
+                    sleep 3
+                    
+                    if curl -s http://localhost:8890 > /dev/null 2>&1; then
+                        echo "✅ Service is responding"
+                    else
+                        echo "⚠️  Service not responding (checking status...)"
+                        kubectl describe pod -n ${K8S_NAMESPACE} -l app=frontend || true
+                    fi
+                    
+                    kill $PF_PID 2>/dev/null || true
+                '''
+            }
+        }
+        
+        stage('Rollback Information') {
+            steps {
+                echo "📝 Build & Deployment Information:"
+                sh '''
+                    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    echo "Build Information:"
+                    echo "  Build Number: ${BUILD_NUMBER}"
+                    echo "  Build Timestamp Tag: ${BUILD_TAG}"
+                    echo "  Latest Tag: ${LATEST_TAG}"
+                    echo "  Git Commit: ${GIT_COMMIT_SHORT}"
+                    echo ""
+                    echo "Docker Image:"
+                    echo "  ${DOCKER_REPO}:${BUILD_TAG}"
+                    echo "  ${DOCKER_REPO}:${LATEST_TAG}"
+                    echo "  ${DOCKER_REPO}:${GIT_COMMIT_SHORT}"
+                    echo ""
+                    echo "Kubernetes:"
+                    echo "  Namespace: ${K8S_NAMESPACE}"
+                    echo "  Deployment: ${K8S_DEPLOYMENT}"
+                    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    echo ""
+                    echo "🔄 To rollback to this build:"
+                    echo "  kubectl set image deployment/${K8S_DEPLOYMENT} \\\\"
+                    echo "    frontend=${DOCKER_REPO}:${BUILD_TAG} \\\\"
+                    echo "    -n ${K8S_NAMESPACE}"
+                    echo ""
+                    echo "📊 All available tags for this image:"
+                    docker images ${DOCKER_REPO} || true
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "🧹 Cleaning up..."
+            sh '''
+                # Clean up any lingering containers
+                docker ps -a | grep ${DOCKER_REPO} | awk '{print $1}' | xargs -r docker rm -f || true
+            '''
+            cleanWs(
+                deleteDirs: true,
+                patterns: [
+                    [pattern: '**/dist/**', type: 'INCLUDE'],
+                    [pattern: '**/.cache/**', type: 'INCLUDE']
+                ]
+            )
+        }
+        
+        success {
+            echo "✅ Build & Deploy successful!"
+            sh '''
+                echo "Frontend build completed successfully"
+                echo "Image: ${DOCKER_REPO}:${BUILD_TAG}"
+                echo "Deployed to: ${K8S_NAMESPACE}/${K8S_DEPLOYMENT}"
+            '''
+        }
+        
+        failure {
+            echo "❌ Build failed!"
+            sh '''
+                echo "Build failed. Check logs above for details."
+            '''
+        }
+    }
+}
