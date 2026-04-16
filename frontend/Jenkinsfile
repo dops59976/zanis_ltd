@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKER_REGISTRY = "docker.io"
-        DOCKER_REPO = "dops59976/fe-zanisltd"
+        DOCKER_REPO = "YOUR_DOCKER_REPO"
         BUILD_TIMESTAMP = sh(script: "date +%Y%m%d_%H%M%S", returnStdout: true).trim()
         BUILD_TAG = "${BUILD_TIMESTAMP}_${BUILD_NUMBER}"
         LATEST_TAG = "latest"
@@ -14,6 +14,7 @@ pipeline {
             steps {
                 echo "📦 Checking out source code..."
                 checkout scm
+                sh 'pwd && ls -la'
             }
         }
         
@@ -21,7 +22,18 @@ pipeline {
             steps {
                 echo "🐳 Building Docker image..."
                 sh '''
-                    cd zanis_ltd/frontend
+                    # Navigate to frontend directory from workspace root
+                    if [ -d "zanis_ltd/frontend" ]; then
+                        cd zanis_ltd/frontend
+                    elif [ -d "frontend" ]; then
+                        cd frontend
+                    else
+                        echo "❌ Frontend directory not found"
+                        ls -la
+                        exit 1
+                    fi
+                    
+                    echo "Building from: $(pwd)"
                     
                     # Build with timestamp tag
                     docker build -t ${DOCKER_REPO}:${BUILD_TAG} .
@@ -65,7 +77,7 @@ pipeline {
         always {
             echo "🧹 Cleaning up..."
             sh '''
-                docker ps -a | grep ${DOCKER_REPO} | awk '{print $1}' | xargs -r docker rm -f || true
+                docker images ${DOCKER_REPO} || true
             '''
         }
         
