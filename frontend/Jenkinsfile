@@ -1,92 +1,84 @@
 pipeline {
     agent any
-    
+
     environment {
-        DOCKER_REGISTRY = "docker.io"
-        DOCKER_REPO = "YOUR_DOCKER_REPO"
-        BUILD_TIMESTAMP = sh(script: "date +%Y%m%d_%H%M%S", returnStdout: true).trim()
-        BUILD_TAG = "${BUILD_TIMESTAMP}_${BUILD_NUMBER}"
-        LATEST_TAG = "latest"
+        // ====== INPUT (bạn sửa lại) ======
+        GIT_REPO = 'https://github.com/dops59976/zanis_ltd.git'
+        GIT_BRANCH = 'main'
+
+        DOCKERHUB_USERNAME = 'dops59976'
+        IMAGE_NAME = 'fe-zanisltd'
+        IMAGE_REPO = "${DOCKERHUB_USERNAME}/${IMAGE_NAME}"
+
+        // Kubernetes
+        K8S_NAMESPACE = 'default'
+        K8S_DEPLOYMENT = 'apps'
+        K8S_CONTAINER = 'apps'
+
+        // Version tag
+        VERSION = "${BUILD_NUMBER}"
     }
-    
+
     stages {
+
         stage('Checkout') {
             steps {
-                echo "📦 Checking out source code..."
-                checkout scm
-                sh 'pwd && ls -la'
+                git branch: "${GIT_BRANCH}",
+                    credentialsId: 'github-token',
+                    url: "${GIT_REPO}"
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
-                echo "🐳 Building Docker image..."
-                sh '''
-                    # Navigate to frontend directory from workspace root
-                    if [ -d "zanis_ltd/frontend" ]; then
-                        cd zanis_ltd/frontend
-                    elif [ -d "frontend" ]; then
-                        cd frontend
-                    else
-                        echo "❌ Frontend directory not found"
-                        ls -la
-                        exit 1
-                    fi
-                    
-                    echo "Building from: $(pwd)"
-                    
-                    # Build with timestamp tag
-                    docker build -t ${DOCKER_REPO}:${BUILD_TAG} .
-                    
-                    # Tag as latest
-                    docker tag ${DOCKER_REPO}:${BUILD_TAG} ${DOCKER_REPO}:${LATEST_TAG}
-                    
-                    echo "✅ Docker images created:"
-                    echo "  - ${DOCKER_REPO}:${BUILD_TAG}"
-                    echo "  - ${DOCKER_REPO}:${LATEST_TAG}"
-                '''
-            }
-        }
-        
-        stage('Push to Docker Hub') {
-            when {
-                branch 'main'
-            }
-            steps {
-                echo "📤 Pushing Docker images to Docker Hub..."
-                script {
-                    withRegistry("https://${DOCKER_REGISTRY}", 'docker-registry') {
-                        sh '''
-                            # Push timestamp tag
-                            docker push ${DOCKER_REPO}:${BUILD_TAG}
-                            
-                            # Push latest tag
-                            docker push ${DOCKER_REPO}:${LATEST_TAG}
-                            
-                            echo "✅ Images pushed successfully"
-                            echo "  - ${DOCKER_REPO}:${BUILD_TAG}"
-                            echo "  - ${DOCKER_REPO}:${LATEST_TAG}"
-                        '''
-                    }
+                dir('frontend') {
+                    sh '''
+                    docker build -t ${IMAGE_REPO}:${VERSION} .
+                    docker tag ${IMAGE_REPO}:${VERSION} ${IMAGE_REPO}:latest
+                    '''
                 }
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push ${IMAGE_REPO}:${VERSION}
+                    docker push ${IMAGE_REPO}:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl set image deployment/${K8S_DEPLOYMENT} \
+                ${K8S_CONTAINER}=${IMAGE_REPO}:${VERSION} \
+                -n ${K8S_NAMESPACE}
+
+                kubectl rollout status deployment/${K8S_DEPLOYMENT} \
+                -n ${K8S_NAMESPACE}
+                '''
+            }
+        }
     }
-    
+
     post {
-        always {
-            echo "🧹 Cleaning up..."
-            sh '''
-                docker images ${DOCKER_REPO} || true
-            '''
-        }
-        
         success {
-            echo "✅ Build successful!"
+            echo "SUCCESS: Deployed ${IMAGE_REPO}:${VERSION}"
         }
-        
         failure {
-            echo "❌ Build failed!"
+            echo "FAILED: Check logs"
+        }
+        always {
+            sh 'docker logout || true'
         }
     }
 }
