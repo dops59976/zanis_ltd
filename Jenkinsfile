@@ -96,9 +96,7 @@ pipeline {
     post {
         always {
             echo "Logging out from Docker Hub..."
-            sh '''
-                docker logout
-            '''
+            sh 'docker logout || true'
         }
         success {
             echo "Pipeline executed successfully!"
