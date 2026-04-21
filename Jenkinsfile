@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = "luannv"
-        FRONTEND_IMAGE = "${DOCKER_HUB_REPO}/zanis-frontend"
-        BACKEND_IMAGE = "${DOCKER_HUB_REPO}/zanis-backend"
+        DOCKER_HUB_REPO = "zanisltd"
+        FRONTEND_IMAGE = "${DOCKER_HUB_REPO}/zanisltd-fe"
+        BACKEND_IMAGE = "${DOCKER_HUB_REPO}/zanisltd-be"
         IMAGE_TAG = "latest"
         DOCKERHUB_CREDS = credentials('docker_hub')
     }
