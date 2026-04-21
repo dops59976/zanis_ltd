@@ -6,7 +6,7 @@ pipeline {
         FRONTEND_IMAGE = "${DOCKER_HUB_REPO}/zanis-frontend"
         BACKEND_IMAGE = "${DOCKER_HUB_REPO}/zanis-backend"
         IMAGE_TAG = "latest"
-        DOCKERHUB_CREDS = credentials('dockerhub')
+        DOCKERHUB_CREDS = credentials('docker_hub')
     }
 
     stages {
