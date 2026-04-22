@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = '89ba80b2-56ad-4be2-978b-f74a6e00019b'
-        FRONTEND_IMAGE = 'luannv/zanis-frontend'
-        BACKEND_IMAGE = 'luannv/zanis-backend'
+        FRONTEND_IMAGE = 'dops59976/zanisltd-fe'
+        BACKEND_IMAGE = 'dops59976/zanisltd-be'
         IMAGE_TAG = 'latest'
     }
 
@@ -75,11 +75,11 @@ pipeline {
             steps {
                 echo "Deploying to Kubernetes..."
                 sh '''
-                kubectl apply -f k8s/ingress.yaml
-                kubectl rollout restart deployment/nginx -n default
-                kubectl rollout restart deployment/backend-api -n default
-                kubectl rollout status deployment/nginx -n default
-                kubectl rollout status deployment/backend-api -n default
+                kubectl apply -f k8s/ingress.yaml -n apps
+                kubectl rollout restart deployment/nginx -n apps
+                kubectl rollout restart deployment/backend-api -n apps
+                kubectl rollout status deployment/nginx -n apps
+                kubectl rollout status deployment/backend-api -n apps
                 '''
             }
         }
@@ -89,13 +89,13 @@ pipeline {
                 echo "Verifying deployment..."
                 sh '''
                 echo "=== Frontend Deployment ==="
-                kubectl get deployment nginx -n default
+                kubectl get deployment nginx -n apps
                 echo "=== Backend Deployment ==="
-                kubectl get deployment backend-api -n default
+                kubectl get deployment backend-api -n apps
                 echo "=== Pods Status ==="
-                kubectl get pods -n default
+                kubectl get pods -n apps
                 echo "=== Ingress Status ==="
-                kubectl get ingress -n default
+                kubectl get ingress -n apps
                 '''
             }
         }
