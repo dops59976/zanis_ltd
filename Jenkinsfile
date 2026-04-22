@@ -2,11 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = "zanisltd"
-        FRONTEND_IMAGE = "${DOCKER_HUB_REPO}/zanisltd-fe"
-        BACKEND_IMAGE = "${DOCKER_HUB_REPO}/zanisltd-be"
-        IMAGE_TAG = "latest"
-        DOCKERHUB_CREDS = credentials('docker_hub')
+        DOCKERHUB_CREDENTIALS = '89ba80b2-56ad-4be2-978b-f74a6e00019b'
+        FRONTEND_IMAGE = 'luannv/zanis-frontend'
+        BACKEND_IMAGE = 'luannv/zanis-backend'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -22,7 +21,7 @@ pipeline {
                 echo "Building frontend image..."
                 dir('frontend') {
                     sh '''
-                        docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} .
+                    docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} .
                     '''
                 }
             }
@@ -33,7 +32,7 @@ pipeline {
                 echo "Building backend image..."
                 dir('backend') {
                     sh '''
-                        docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} .
+                    docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} .
                     '''
                 }
             }
@@ -42,9 +41,15 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 echo "Logging in to Docker Hub..."
-                sh '''
-                    echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
-                '''
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
@@ -52,7 +57,7 @@ pipeline {
             steps {
                 echo "Pushing frontend image to Docker Hub..."
                 sh '''
-                    docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
                 '''
             }
         }
@@ -61,7 +66,7 @@ pipeline {
             steps {
                 echo "Pushing backend image to Docker Hub..."
                 sh '''
-                    docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
                 '''
             }
         }
@@ -70,10 +75,11 @@ pipeline {
             steps {
                 echo "Deploying to Kubernetes..."
                 sh '''
-                    kubectl set image deployment/nginx nginx=${FRONTEND_IMAGE}:${IMAGE_TAG} -n default
-                    kubectl set image deployment/backend-api backend=${BACKEND_IMAGE}:${IMAGE_TAG} -n default
-                    kubectl rollout status deployment/nginx -n default
-                    kubectl rollout status deployment/backend-api -n default
+                kubectl apply -f k8s/ingress.yaml
+                kubectl rollout restart deployment/nginx -n default
+                kubectl rollout restart deployment/backend-api -n default
+                kubectl rollout status deployment/nginx -n default
+                kubectl rollout status deployment/backend-api -n default
                 '''
             }
         }
@@ -82,12 +88,14 @@ pipeline {
             steps {
                 echo "Verifying deployment..."
                 sh '''
-                    echo "=== Frontend Deployment ==="
-                    kubectl get deployment nginx -n default
-                    echo "=== Backend Deployment ==="
-                    kubectl get deployment backend-api -n default
-                    echo "=== Pods Status ==="
-                    kubectl get pods -n default
+                echo "=== Frontend Deployment ==="
+                kubectl get deployment nginx -n default
+                echo "=== Backend Deployment ==="
+                kubectl get deployment backend-api -n default
+                echo "=== Pods Status ==="
+                kubectl get pods -n default
+                echo "=== Ingress Status ==="
+                kubectl get ingress -n default
                 '''
             }
         }
@@ -99,10 +107,10 @@ pipeline {
             sh 'docker logout || true'
         }
         success {
-            echo "Pipeline executed successfully!"
+            echo "✅ Pipeline executed successfully!"
         }
         failure {
-            echo "Pipeline failed!"
+            echo "❌ Pipeline failed!"
         }
     }
 }
