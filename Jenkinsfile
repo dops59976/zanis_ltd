@@ -75,7 +75,7 @@ pipeline {
             steps {
                 echo "Deploying to Kubernetes..."
                 sh '''
-                kubectl apply -f k8s/ingress.yaml -n apps
+                kubectl apply -f k8s/zanisltd.yaml
                 kubectl rollout restart deployment/nginx -n apps
                 kubectl rollout restart deployment/backend-api -n apps
                 kubectl rollout status deployment/nginx -n apps
