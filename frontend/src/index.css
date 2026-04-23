@@ -2,13 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #0a0e27;
-  --accent: #00d4ff;
-  --gradient-blue: #1d4ed8;
-  --gradient-purple: #9333ea;
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -25,21 +18,29 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--primary);
-  color: white;
+  background-color: #ffffff;
+  color: #000000;
 }
 
-.bg-primary {
-  background-color: var(--primary);
+/* Smooth transitions */
+button {
+  transition: all 0.3s ease;
 }
 
-.bg-gradient {
-  background: linear-gradient(to right, var(--gradient-blue), #a855f7, var(--gradient-purple));
+input {
+  transition: all 0.2s ease;
 }
 
-.text-gradient {
-  background: linear-gradient(to right, var(--gradient-blue), var(--gradient-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Modal backdrop */
+.modal-backdrop {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

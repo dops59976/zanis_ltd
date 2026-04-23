@@ -1,19 +1,19 @@
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Features from './components/Features'
-import Testimonials from './components/Testimonials'
 import Pricing from './components/Pricing'
+import Testimonials from './components/Testimonials'
 import Footer from './components/Footer'
 import './index.css'
 
 function App() {
   return (
-    <div className="min-h-screen bg-primary text-white">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <Hero />
       <Features />
-      <Testimonials />
       <Pricing />
+      <Testimonials />
       <Footer />
     </div>
   )
