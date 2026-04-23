@@ -22,7 +22,10 @@ export default function Pricing() {
   ];
 
   return (
-    <section className="bg-white py-20">
+    <section className="bg-gradient-to-b from-white to-gray-50 py-20 relative">
+      {/* Background accent */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gray-100/20 rounded-full filter blur-3xl -z-10"></div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-black mb-4">Simple, Transparent Pricing</h2>
@@ -33,40 +36,72 @@ export default function Pricing() {
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`rounded-3xl p-8 transition ${
+              className={`rounded-3xl p-8 transition-all card-hover relative overflow-hidden ${
                 plan.highlight
-                  ? 'bg-black text-white border-2 border-black'
-                  : 'bg-gray-50 border-2 border-gray-200 hover:border-black'
+                  ? 'bg-black text-white border-2 border-black md:scale-105 md:-mt-4 shadow-2xl'
+                  : 'bg-white border-2 border-gray-200 hover:border-gray-400'
               }`}
             >
+              {/* Gradient overlay for pro plan */}
+              {plan.highlight && (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black opacity-50 -z-10"></div>
+              )}
+
+              {/* Badge */}
+              {plan.highlight && (
+                <div className="mb-6 inline-block px-4 py-1 bg-white text-black font-bold text-sm rounded-full">
+                  Most Popular
+                </div>
+              )}
+
               <h3 className={`text-2xl font-bold mb-2 ${plan.highlight ? 'text-white' : 'text-black'}`}>
                 {plan.name}
               </h3>
-              <div className="text-4xl font-bold mb-6">
-                {plan.price}
-                {plan.period && <span className={`text-lg ${plan.highlight ? 'text-gray-300' : 'text-gray-600'}`}>{plan.period}</span>}
+              <div className="mb-8">
+                <span className={`text-5xl font-black ${plan.highlight ? 'text-white' : 'text-black'}`}>
+                  {plan.price}
+                </span>
+                {plan.period && (
+                  <span className={plan.highlight ? 'text-gray-300' : 'text-gray-600'}>
+                    {plan.period}
+                  </span>
+                )}
               </div>
 
-              <ul className={`space-y-4 mb-8 ${plan.highlight ? 'text-gray-200' : 'text-gray-600'}`}>
-                {plan.features.map((feature, fidx) => (
-                  <li key={fidx} className="flex items-center gap-3">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.highlight ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                      ✓
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
+              {/* Button */}
               <button
-                className={`w-full py-3 font-semibold rounded-full transition ${
+                className={`w-full py-3 px-4 rounded-xl font-bold mb-8 transition-all transform hover:scale-105 active:scale-95 ${
                   plan.highlight
-                    ? 'bg-white text-black hover:bg-gray-100'
+                    ? 'bg-white text-black hover:shadow-lg'
                     : 'border-2 border-black text-black hover:bg-black hover:text-white'
                 }`}
               >
                 Get Started
               </button>
+
+              {/* Features List */}
+              <ul className={`space-y-4 ${plan.highlight ? 'text-gray-100' : 'text-gray-700'}`}>
+                {plan.features.map((feature, fidx) => (
+                  <li key={fidx} className="flex items-center gap-3 group">
+                    <svg
+                      className={`w-5 h-5 flex-shrink-0 transform group-hover:scale-125 transition ${
+                        plan.highlight ? 'text-white' : 'text-black'
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium group-hover:translate-x-1 transition">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
