@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = '89ba80b2-56ad-4be2-978b-f74a6e00019b'
+        IMAGE_NAME = 'dops59976/test-image'
+        TAG = 'test'
+    }
+
+    stages {
+
+stage('Create test Dockerfile') {
+    steps {
+        sh '''
+        echo 'FROM alpine:3.19' > Dockerfile
+        echo 'CMD ["echo", "Hello from Jenkins"]' >> Dockerfile
+        '''
+    }
+}
+
+        stage('Build Image') {
+            steps {
+                sh '''
+                docker build -t $IMAGE_NAME:$TAG .
+                '''
+            }
+        }
+
+        stage('Login DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh '''
+                docker push $IMAGE_NAME:$TAG
+                '''
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                docker logout
+                docker rmi $IMAGE_NAME:$TAG || true
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Docker Hub login & push OK"
+        }
+        failure {
+            echo "❌ Test thất bại - check lại credentials hoặc Docker daemon"
+        }
+    }
+}

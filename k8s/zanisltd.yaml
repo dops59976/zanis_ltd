@@ -1,5 +1,11 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: apps
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: nginx
@@ -35,7 +41,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: luannv/zanis-frontend:latest
+        image: dops59976/zanisltd-fe:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -84,7 +90,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: luannv/zanis-backend:latest
+        image: dops59976/zanisltd-be:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
