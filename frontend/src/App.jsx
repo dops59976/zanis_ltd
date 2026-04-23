@@ -8,7 +8,7 @@ import './index.css'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
       <Navbar />
       <Hero />
       <Features />

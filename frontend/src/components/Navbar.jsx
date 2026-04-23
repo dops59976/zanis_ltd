@@ -60,7 +60,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleAuthClick('signin')}
-                className="hidden sm:block px-4 py-2 text-black hover:text-gray-600 font-semibold transition link-underline"
+                className="hidden sm:block px-4 py-2 text-black hover:text-gray-600 font-semibold transition"
               >
                 Sign In
               </button>
@@ -134,7 +134,7 @@ function AuthModal({ mode, setMode, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-slide-up">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -182,7 +182,7 @@ function AuthModal({ mode, setMode, onClose }) {
         </div>
 
         {/* Form */}
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           {mode === 'signup' && (
             <div>
               <input
@@ -230,7 +230,7 @@ function AuthModal({ mode, setMode, onClose }) {
               Don't have an account?{' '}
               <button
                 onClick={() => setMode('signup')}
-                className="text-black font-semibold link-underline"
+                className="text-black font-semibold hover:underline"
               >
                 Sign Up
               </button>
@@ -240,7 +240,7 @@ function AuthModal({ mode, setMode, onClose }) {
               Already have an account?{' '}
               <button
                 onClick={() => setMode('signin')}
-                className="text-black font-semibold link-underline"
+                className="text-black font-semibold hover:underline"
               >
                 Sign In
               </button>
@@ -251,11 +251,11 @@ function AuthModal({ mode, setMode, onClose }) {
         {/* Terms */}
         <p className="text-xs text-gray-500 text-center mt-6">
           By signing in, you agree to our{' '}
-          <a href="#" className="text-black link-underline">
+          <a href="#" className="text-black hover:underline">
             Terms of Service
           </a>{' '}
           and{' '}
-          <a href="#" className="text-black link-underline">
+          <a href="#" className="text-black hover:underline">
             Privacy Policy
           </a>
         </p>
