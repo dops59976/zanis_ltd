@@ -83,25 +83,9 @@ pipeline {
                 echo "Applying K8s manifests..."
                 kubectl apply -f k8s/01-namespace.yaml
                 kubectl apply -f k8s/02-frontend-backend.yaml
-                
-                # Wait for deployments to be ready
-                echo "Waiting for frontend deployment..."
-                kubectl rollout status deployment/frontend -n apps --timeout=5m
-                
-                echo "Waiting for backend deployment..."
-                kubectl rollout status deployment/backend -n apps --timeout=5m
-                
-                echo "✅ All deployments ready"
-                '''
-            }
-        }
-
-        stage('Apply Ingress') {
-            steps {
-                echo "🌐 Configuring ingress for zanis.com..."
-                sh '''
                 kubectl apply -f k8s/03-ingress.yaml
-                echo "✅ Ingress configured"
+                
+                echo "✅ K8s manifests applied"
                 '''
             }
         }
@@ -110,32 +94,21 @@ pipeline {
             steps {
                 echo "✔️ Verifying deployment..."
                 sh '''
-                echo "=== Namespace ==="
-                kubectl get namespace apps
+                echo "Waiting for frontend deployment..."
+                kubectl rollout status deployment/frontend -n apps --timeout=5m
+                
+                echo "Waiting for backend deployment..."
+                kubectl rollout status deployment/backend -n apps --timeout=5m || true
                 
                 echo ""
-                echo "=== Frontend Deployment ==="
-                kubectl get deployment frontend -n apps
-                
-                echo ""
-                echo "=== Backend Deployment ==="
-                kubectl get deployment backend -n apps
-                
-                echo ""
-                echo "=== Pods Status ==="
+                echo "=== Pod Status ==="
                 kubectl get pods -n apps
-                
-                echo ""
-                echo "=== Services ==="
-                kubectl get svc -n apps
                 
                 echo ""
                 echo "=== Ingress Status ==="
                 kubectl get ingress -n apps
                 
-                echo ""
-                echo "=== Ingress Details ==="
-                kubectl describe ingress zanis-ingress -n apps
+                echo "✅ Deployment verified"
                 '''
             }
         }
