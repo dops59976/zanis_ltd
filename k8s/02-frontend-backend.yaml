@@ -42,8 +42,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: zanis-frontend:latest
-        imagePullPolicy: Never
+        image: dops59976/zanisltd-fe:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         resources:
@@ -110,8 +110,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: backend:latest
-        imagePullPolicy: Never
+        image: dops59976/zanisltd-be:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         resources:
