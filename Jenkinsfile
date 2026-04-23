@@ -11,17 +11,18 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo "Checking out code..."
+                echo "📦 Checking out code..."
                 checkout scm
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                echo "Building frontend image..."
+                echo "🔨 Building frontend image..."
                 dir('frontend') {
                     sh '''
                     docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} .
+                    echo "✅ Frontend image built: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
                     '''
                 }
             }
@@ -29,10 +30,11 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-                echo "Building backend image..."
+                echo "🔨 Building backend image..."
                 dir('backend') {
                     sh '''
                     docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} .
+                    echo "✅ Backend image built: ${BACKEND_IMAGE}:${IMAGE_TAG}"
                     '''
                 }
             }
@@ -40,7 +42,7 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                echo "Logging in to Docker Hub..."
+                echo "🔐 Logging in to Docker Hub..."
                 withCredentials([usernamePassword(
                     credentialsId: "${DOCKERHUB_CREDENTIALS}",
                     usernameVariable: 'DOCKER_USER',
@@ -55,47 +57,85 @@ pipeline {
 
         stage('Push Frontend Image') {
             steps {
-                echo "Pushing frontend image to Docker Hub..."
+                echo "📤 Pushing frontend image to Docker Hub..."
                 sh '''
                 docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                echo "✅ Frontend image pushed"
                 '''
             }
         }
 
         stage('Push Backend Image') {
             steps {
-                echo "Pushing backend image to Docker Hub..."
+                echo "📤 Pushing backend image to Docker Hub..."
                 sh '''
                 docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                echo "✅ Backend image pushed"
                 '''
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                echo "Deploying to Kubernetes..."
+                echo "🚀 Deploying to Kubernetes..."
                 sh '''
-                kubectl apply -f k8s/zanisltd.yaml
-                kubectl rollout restart deployment/nginx -n apps
-                kubectl rollout restart deployment/backend-api -n apps
-                kubectl rollout status deployment/nginx -n apps
-                kubectl rollout status deployment/backend-api -n apps
+                # Apply namespace and deployments
+                echo "Applying K8s manifests..."
+                kubectl apply -f k8s/01-namespace.yaml
+                kubectl apply -f k8s/02-frontend-backend.yaml
+                
+                # Wait for deployments to be ready
+                echo "Waiting for frontend deployment..."
+                kubectl rollout status deployment/frontend -n apps --timeout=5m
+                
+                echo "Waiting for backend deployment..."
+                kubectl rollout status deployment/backend -n apps --timeout=5m
+                
+                echo "✅ All deployments ready"
+                '''
+            }
+        }
+
+        stage('Apply Ingress') {
+            steps {
+                echo "🌐 Configuring ingress for zanis.com..."
+                sh '''
+                kubectl apply -f k8s/03-ingress.yaml
+                echo "✅ Ingress configured"
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                echo "Verifying deployment..."
+                echo "✔️ Verifying deployment..."
                 sh '''
+                echo "=== Namespace ==="
+                kubectl get namespace apps
+                
+                echo ""
                 echo "=== Frontend Deployment ==="
-                kubectl get deployment nginx -n apps
+                kubectl get deployment frontend -n apps
+                
+                echo ""
                 echo "=== Backend Deployment ==="
-                kubectl get deployment backend-api -n apps
+                kubectl get deployment backend -n apps
+                
+                echo ""
                 echo "=== Pods Status ==="
                 kubectl get pods -n apps
+                
+                echo ""
+                echo "=== Services ==="
+                kubectl get svc -n apps
+                
+                echo ""
                 echo "=== Ingress Status ==="
                 kubectl get ingress -n apps
+                
+                echo ""
+                echo "=== Ingress Details ==="
+                kubectl describe ingress zanis-ingress -n apps
                 '''
             }
         }
@@ -103,14 +143,16 @@ pipeline {
 
     post {
         always {
-            echo "Logging out from Docker Hub..."
+            echo "🧹 Cleaning up..."
             sh 'docker logout || true'
         }
         success {
             echo "✅ Pipeline executed successfully!"
+            echo "🌐 Frontend: zanis.com"
+            echo "🔌 API: api.zanis.com"
         }
         failure {
-            echo "❌ Pipeline failed!"
+            echo "❌ Pipeline failed! Check logs above."
         }
     }
 }
