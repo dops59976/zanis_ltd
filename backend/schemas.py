@@ -9,6 +9,19 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     google_id: Optional[str] = None
 
+class UserSignup(UserBase):
+    password: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class LoginResponse(BaseModel):
+    session_id: int
+    token: str
+    expires_at: datetime
+    user: 'User'
+
 class User(UserBase):
     id: int
     google_id: Optional[str]
@@ -19,6 +32,9 @@ class User(UserBase):
     
     class Config:
         from_attributes = True
+
+LoginResponse.model_rebuild()
+
 
 class SessionCreate(BaseModel):
     user_id: int

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import { api } from './api';
 import './index.css';
 
@@ -192,12 +194,19 @@ const styles = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [dbStatus, setDbStatus] = useState(null);
   const [users, setUsers] = useState([]);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     checkDbStatus();
@@ -248,9 +257,39 @@ export default function Dashboard() {
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <div style={styles.logo}>
-            <div style={styles.logoIcon}>ZP</div>
-            <h1 style={styles.title}>Zanis Platform</h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={styles.logo}>
+              <div style={styles.logoIcon}>ZP</div>
+              <h1 style={styles.title}>Zanis Platform</h1>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {user && (
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Welcome, <strong>{user.name}</strong>
+                </span>
+              )}
+              <button
+                onClick={handleLogout}
+                style={{
+                  paddingTop: '8px',
+                  paddingBottom: '8px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = '#dc2626')}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = '#ef4444')}
+              >
+                Logout
+              </button>
+            </div>
           </div>
           <p style={styles.subtitle}>User Management</p>
         </div>
@@ -277,47 +316,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Create User Form */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Add New User</h2>
-          <form onSubmit={handleCreateUser} style={styles.form}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Email</label>
-              <input
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={styles.input}
-                disabled={loading}
-              />
-            </div>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Name</label>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={styles.input}
-                disabled={loading}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                ...styles.button,
-                backgroundColor: loading ? '#9ca3af' : '#2563eb',
-                opacity: loading ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#1d4ed8')}
-              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#2563eb')}
-            >
-              {loading ? 'Creating...' : 'Create User'}
-            </button>
-          </form>
-        </div>
+
 
         {/* Error Message */}
         {error && (
@@ -328,7 +327,7 @@ export default function Dashboard() {
 
         {/* Users List */}
         <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Users ({users.length})</h2>
+          <h2 style={styles.sectionTitle}>All Users ({users.length})</h2>
           {users.length > 0 ? (
             <div style={styles.card}>
               <div style={{ overflowX: 'auto' }}>
@@ -343,16 +342,16 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id} style={styles.tr}>
-                        <td style={{ ...styles.td, fontWeight: '500' }}>{user.id}</td>
-                        <td style={styles.td}>{user.email}</td>
-                        <td style={styles.td}>{user.name}</td>
+                    {users.map((u) => (
+                      <tr key={u.id} style={styles.tr}>
+                        <td style={{ ...styles.td, fontWeight: '500' }}>{u.id}</td>
+                        <td style={styles.td}>{u.email}</td>
+                        <td style={styles.td}>{u.name}</td>
                         <td style={styles.td}>
-                          <span style={styles.badge}>Active</span>
+                          <span style={styles.badge}>{u.is_active ? 'Active' : 'Inactive'}</span>
                         </td>
                         <td style={{ ...styles.td, ...styles.tdSecondary }}>
-                          {new Date(user.created_at).toLocaleDateString()}
+                          {new Date(u.created_at).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}
@@ -362,7 +361,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div style={styles.empty}>
-              No users yet. Create one to get started.
+              No users found.
             </div>
           )}
         </div>
