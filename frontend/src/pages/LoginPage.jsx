@@ -8,21 +8,18 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundImage: 'url(/images/richer.jpg)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
+    background: 'linear-gradient(135deg, #0f172a 0%, #1a2847 100%)',
     width: '100%',
   },
   card: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    backdropFilter: 'blur(25px)',
-    borderRadius: '24px',
-    border: 'solid 5px rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#1e293b',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '16px',
+    border: '1px solid rgba(100, 220, 220, 0.3)',
     padding: '48px 40px',
     width: '100%',
-    maxWidth: '400px',
-    boxShadow: '0px 0px 30px 20px rgba(0, 0, 0, 0.1)',
+    maxWidth: '420px',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
     color: '#ffffff',
   },
   header: {
@@ -33,19 +30,19 @@ const styles = {
     marginBottom: '32px',
   },
   logo: {
-    width: '40px',
-    height: '40px',
-    border: '2px solid #ffffff',
-    borderRadius: '4px',
+    width: '48px',
+    height: '48px',
+    backgroundColor: '#64dcdc',
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '14px',
+    fontSize: '20px',
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#000',
   },
   title: {
-    fontSize: '48px',
+    fontSize: '32px',
     fontWeight: '700',
     color: '#ffffff',
     margin: 0,
@@ -55,7 +52,7 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     marginTop: '8px',
-    marginBottom: '24px',
+    marginBottom: '32px',
   },
   form: {
     display: 'flex',
@@ -67,54 +64,52 @@ const styles = {
     flexDirection: 'column',
     gap: '8px',
     position: 'relative',
-    marginTop: '20px',
+    marginTop: '16px',
   },
   label: {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.75)',
-    display: 'none',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.8)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
   input: {
     width: '100%',
-    padding: '10px 16px 10px 38px',
-    border: 'solid 3px transparent',
-    borderRadius: '99px',
+    padding: '12px 16px',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
     fontSize: '14px',
     outline: 'none',
     transition: 'all 0.25s',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     color: '#ffffff',
-    caretColor: '#ffffff',
+    caretColor: '#64dcdc',
     fontWeight: 500,
   },
-  inputPlaceholder: {
-    '::placeholder': {
-      color: 'rgba(255, 255, 255, 0.75)',
-    },
-  },
   inputFocus: {
-    border: 'solid 3px rgba(255, 255, 255, 0.3)',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid #64dcdc',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    boxShadow: '0 0 0 3px rgba(100, 220, 220, 0.1)',
   },
   button: {
     width: '100%',
-    paddingTop: '14px',
-    paddingBottom: '14px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
     paddingLeft: '16px',
     paddingRight: '16px',
-    backgroundColor: 'rgba(100, 220, 220, 0.8)',
-    color: '#ffffff',
+    backgroundColor: '#64dcdc',
+    color: '#000',
     fontWeight: '600',
     fontSize: '16px',
     border: 'none',
-    borderRadius: '99px',
+    borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'all 0.1s',
+    transition: 'all 0.2s',
     marginTop: '24px',
   },
   buttonHover: {
-    backgroundColor: 'rgba(100, 200, 200, 1)',
+    backgroundColor: '#4cc9c9',
+    boxShadow: '0 8px 16px rgba(100, 220, 220, 0.3)',
   },
   buttonDisabled: {
     backgroundColor: 'rgba(100, 220, 220, 0.5)',
@@ -122,9 +117,9 @@ const styles = {
     opacity: 0.6,
   },
   error: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     border: '1px solid rgba(239, 68, 68, 0.5)',
-    color: '#fecaca',
+    color: '#fca5a5',
     padding: '12px 16px',
     borderRadius: '8px',
     fontSize: '14px',
@@ -140,17 +135,17 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    color: '#ffffff',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: '14px',
   },
   checkbox: {
     width: '18px',
     height: '18px',
     cursor: 'pointer',
-    accentColor: 'rgba(100, 220, 220, 0.8)',
+    accentColor: '#64dcdc',
   },
   forgotPassword: {
-    color: '#ffffff',
+    color: 'rgba(255, 255, 255, 0.7)',
     textDecoration: 'none',
     cursor: 'pointer',
     fontSize: '14px',
@@ -158,24 +153,26 @@ const styles = {
     border: 'none',
     padding: 0,
     fontWeight: 'normal',
+    transition: 'color 0.2s',
   },
   forgotPasswordHover: {
-    textDecoration: 'underline',
+    color: '#64dcdc',
   },
   link: {
     textAlign: 'center',
     fontSize: '14px',
-    color: '#ffffff',
+    color: 'rgba(255, 255, 255, 0.7)',
     marginTop: '24px',
   },
   linkButton: {
-    color: '#ffffff',
+    color: '#64dcdc',
     textDecoration: 'none',
     cursor: 'pointer',
     fontWeight: '600',
     background: 'none',
     border: 'none',
     padding: 0,
+    transition: 'color 0.2s',
   },
 };
 
@@ -213,10 +210,10 @@ export default function LoginPage() {
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.header}>
-          <div style={styles.logo}>ZP</div>
+          <div style={styles.logo}>Z</div>
           <h1 style={styles.title}>Zanis</h1>
         </div>
-        <p style={styles.subtitle}>Sign in to your account</p>
+        <p style={styles.subtitle}>Admin Dashboard</p>
 
         {(error || authError) && (
           <div style={styles.error}>
@@ -226,10 +223,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>Email Address</label>
             <input
               type="email"
-              placeholder="you@example.com"
+              placeholder="admin@zanis.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setFocusedField('email')}
@@ -259,15 +256,30 @@ export default function LoginPage() {
             />
           </div>
 
+          <div style={styles.checkboxSection}>
+            <label style={styles.checkboxLabel}>
+              <input type="checkbox" style={styles.checkbox} />
+              Remember me
+            </label>
+            <button
+              type="button"
+              style={styles.forgotPassword}
+              onMouseEnter={(e) => (e.target.style.color = '#64dcdc')}
+              onMouseLeave={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
+            >
+              Forgot password?
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
             style={{
               ...styles.button,
-              ...(loading ? styles.buttonDisabled : styles.buttonHover),
+              ...(loading ? styles.buttonDisabled : {}),
             }}
-            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#1d4ed8')}
-            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#2563eb')}
+            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#4cc9c9')}
+            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#64dcdc')}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -279,8 +291,10 @@ export default function LoginPage() {
             type="button"
             style={styles.linkButton}
             onClick={() => navigate('/signup')}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#64dcdc')}
           >
-            Sign up
+            Sign up here
           </button>
         </p>
       </div>
