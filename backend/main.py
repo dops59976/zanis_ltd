@@ -14,8 +14,8 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello from FastAPI Backend"}
+    return {"message": "Welcome to Zanis LTD"}
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"message": "Welcome to Zanis LTD", "status": "ok"}
