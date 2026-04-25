@@ -90,30 +90,6 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
-            steps {
-                echo "✔️ Verifying deployment..."
-                sh '''
-                echo "Waiting for frontend deployment..."
-                kubectl rollout status deployment/frontend -n apps --timeout=5m
-                
-                echo "Waiting for backend deployment..."
-                kubectl rollout status deployment/backend -n apps --timeout=5m || true
-                
-                echo ""
-                echo "=== Pod Status ==="
-                kubectl get pods -n apps
-                
-                echo ""
-                echo "=== Ingress Status ==="
-                kubectl get ingress -n apps
-                
-                echo "✅ Deployment verified"
-                '''
-            }
-        }
-    }
-
     post {
         always {
             echo "🧹 Cleaning up..."
