@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from database import init_db, get_db
 from models import User, Session as DBSession
 from schemas import UserCreate, User as UserSchema
@@ -110,7 +111,7 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
 def db_status(db: Session = Depends(get_db)):
     try:
         # Simple DB check
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         return {"status": "connected", "message": "Database is connected"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")}
