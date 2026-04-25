@@ -5,6 +5,7 @@ import { AuthProvider } from './AuthContext'
 import ProtectedRoute from './ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import DashboardPage from './pages/DashboardPage'
 import Dashboard from './Dashboard'
 import './index.css'
 
@@ -19,11 +20,11 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardPage />
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
