@@ -1,5 +1,195 @@
 import { useState, useEffect } from 'react';
 import { api } from './api';
+import './index.css';
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#ffffff',
+  },
+  header: {
+    borderBottom: '1px solid #e5e7eb',
+  },
+  headerContent: {
+    maxWidth: '1200px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    paddingLeft: '32px',
+    paddingRight: '32px',
+    paddingTop: '24px',
+    paddingBottom: '24px',
+  },
+  logo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '8px',
+  },
+  logoIcon: {
+    width: '32px',
+    height: '32px',
+    border: '2px solid #111827',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  subtitle: {
+    color: '#4b5563',
+    fontSize: '14px',
+  },
+  main: {
+    maxWidth: '1200px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    paddingLeft: '32px',
+    paddingRight: '32px',
+    paddingTop: '48px',
+  },
+  section: {
+    marginBottom: '48px',
+  },
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: '24px',
+  },
+  card: {
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    padding: '24px',
+  },
+  statusDot: {
+    width: '8px',
+    height: '8px',
+    backgroundColor: '#10b981',
+    borderRadius: '50%',
+  },
+  statusText: {
+    color: '#059669',
+    fontWeight: '500',
+  },
+  form: {
+    maxWidth: '448px',
+  },
+  formGroup: {
+    marginBottom: '16px',
+  },
+  label: {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: '8px',
+  },
+  input: {
+    width: '100%',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '14px',
+    outline: 'none',
+    transition: 'all 0.2s',
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#2563eb',
+    color: 'white',
+    fontWeight: '600',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    marginTop: '8px',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+  },
+  tableHeader: {
+    backgroundColor: '#f9fafb',
+    borderBottom: '1px solid #e5e7eb',
+  },
+  th: {
+    paddingLeft: '24px',
+    paddingRight: '24px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    textAlign: 'left',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#374151',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  td: {
+    paddingLeft: '24px',
+    paddingRight: '24px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
+    fontSize: '14px',
+    color: '#111827',
+  },
+  tdSecondary: {
+    color: '#6b7280',
+  },
+  tr: {
+    borderBottom: '1px solid #e5e7eb',
+  },
+  trHover: {
+    backgroundColor: '#f9fafb',
+  },
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    borderRadius: '9999px',
+    fontSize: '12px',
+    fontWeight: '500',
+    backgroundColor: '#dcfce7',
+    color: '#166534',
+  },
+  error: {
+    border: '1px solid #fecaca',
+    backgroundColor: '#fef2f2',
+    color: '#b91c1c',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    borderRadius: '8px',
+    fontSize: '14px',
+  },
+  empty: {
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    paddingLeft: '32px',
+    paddingRight: '32px',
+    paddingTop: '32px',
+    paddingBottom: '32px',
+    textAlign: 'center',
+    color: '#6b7280',
+    fontSize: '14px',
+  },
+};
 
 export default function Dashboard() {
   const [dbStatus, setDbStatus] = useState(null);
@@ -54,140 +244,114 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div style={styles.container}>
       {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-8 py-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 border-2 border-gray-900 rounded flex items-center justify-center">
-              <span className="text-xs font-bold text-gray-900">ZP</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Zanis Platform</h1>
+      <header style={styles.header}>
+        <div style={styles.headerContent}>
+          <div style={styles.logo}>
+            <div style={styles.logoIcon}>ZP</div>
+            <h1 style={styles.title}>Zanis Platform</h1>
           </div>
-          <p className="text-gray-600 text-sm">User Management</p>
+          <p style={styles.subtitle}>User Management</p>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-8 py-12">
+      <main style={styles.main}>
         {/* DB Status Card */}
-        <div className="mb-12">
-          <div className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
+        <div style={styles.section}>
+          <div style={styles.card}>
+            <h2 style={{ ...styles.sectionTitle, marginBottom: '16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               System Status
             </h2>
             {dbStatus ? (
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-700 font-medium">
-                  Database Connected
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={styles.statusDot}></div>
+                <span style={styles.statusText}>Database Connected</span>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                <span className="text-gray-600">Checking database...</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ ...styles.statusDot, backgroundColor: '#d1d5db' }}></div>
+                <span style={{ color: '#6b7280' }}>Checking database...</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Create User Form */}
-        <div className="mb-12">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">
-            Add New User
-          </h2>
-          <form onSubmit={handleCreateUser} className="max-w-md">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  placeholder="user@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
-                  disabled={loading}
-                />
-              </div>
-              <button
-                type="submit"
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>Add New User</h2>
+          <form onSubmit={handleCreateUser} style={styles.form}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Email</label>
+              <input
+                type="email"
+                placeholder="user@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={styles.input}
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition mt-2"
-              >
-                {loading ? 'Creating...' : 'Create User'}
-              </button>
+              />
             </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Name</label>
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={styles.input}
+                disabled={loading}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                ...styles.button,
+                backgroundColor: loading ? '#9ca3af' : '#2563eb',
+                opacity: loading ? 0.6 : 1,
+              }}
+              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#1d4ed8')}
+              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#2563eb')}
+            >
+              {loading ? 'Creating...' : 'Create User'}
+            </button>
           </form>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-8 border border-red-300 bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
-            {error}
+          <div style={{ ...styles.section, marginBottom: '32px' }}>
+            <div style={styles.error}>{error}</div>
           </div>
         )}
 
         {/* Users List */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">
-            Users ({users.length})
-          </h2>
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>Users ({users.length})</h2>
           {users.length > 0 ? (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Created
-                      </th>
+            <div style={styles.card}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={styles.table}>
+                  <thead style={styles.tableHeader}>
+                    <tr>
+                      <th style={styles.th}>ID</th>
+                      <th style={styles.th}>Email</th>
+                      <th style={styles.th}>Name</th>
+                      <th style={styles.th}>Status</th>
+                      <th style={styles.th}>Created</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody>
                     {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                          {user.id}
+                      <tr key={user.id} style={styles.tr}>
+                        <td style={{ ...styles.td, fontWeight: '500' }}>{user.id}</td>
+                        <td style={styles.td}>{user.email}</td>
+                        <td style={styles.td}>{user.name}</td>
+                        <td style={styles.td}>
+                          <span style={styles.badge}>Active</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {user.email}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {user.name}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
+                        <td style={{ ...styles.td, ...styles.tdSecondary }}>
                           {new Date(user.created_at).toLocaleDateString()}
                         </td>
                       </tr>
@@ -197,8 +361,8 @@ export default function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="border border-gray-200 rounded-lg p-8 text-center">
-              <p className="text-gray-600 text-sm">No users yet. Create one to get started.</p>
+            <div style={styles.empty}>
+              No users yet. Create one to get started.
             </div>
           )}
         </div>
