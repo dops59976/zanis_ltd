@@ -1,4 +1,15 @@
 ---
+# PostgreSQL Init Script ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: apps
+data:
+  init.sql: |
+    CREATE DATABASE zanis_db OWNER zanis;
+
+---
 # PostgreSQL ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -96,7 +107,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - pg_isready -U $POSTGRES_USER
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
@@ -104,13 +115,18 @@ spec:
             command:
             - /bin/sh
             - -c
-            - pg_isready -U $POSTGRES_USER
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
           initialDelaySeconds: 5
           periodSeconds: 10
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: postgres-storage
         emptyDir:
           sizeLimit: 10Gi
+      - name: init-script
+        configMap:
+          name: postgres-init
