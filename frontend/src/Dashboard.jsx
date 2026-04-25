@@ -54,30 +54,37 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Zanis LTD</h1>
-          <p className="text-gray-600 mt-1">User Management Dashboard</p>
+      <header className="border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-8 py-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 border-2 border-gray-900 rounded flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-900">ZP</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Zanis Platform</h1>
+          </div>
+          <p className="text-gray-600 text-sm">User Management</p>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* DB Status */}
-        <div className="mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">System Status</h2>
+      <main className="max-w-6xl mx-auto px-8 py-12">
+        {/* DB Status Card */}
+        <div className="mb-12">
+          <div className="border border-gray-200 rounded-lg p-6">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
+              System Status
+            </h2>
             {dbStatus ? (
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-green-700">
-                  Database Connected ({dbStatus.status})
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-700 font-medium">
+                  Database Connected
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
                 <span className="text-gray-600">Checking database...</span>
               </div>
             )}
@@ -85,70 +92,80 @@ export default function Dashboard() {
         </div>
 
         {/* Create User Form */}
-        <div className="mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Create User</h2>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+        <div className="mb-12">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">
+            Add New User
+          </h2>
+          <form onSubmit={handleCreateUser} className="max-w-md">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                   disabled={loading}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name
+                </label>
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                   disabled={loading}
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition mt-2"
               >
                 {loading ? 'Creating...' : 'Create User'}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          <div className="mb-8 border border-red-300 bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
 
         {/* Users List */}
         <div>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">Users ({users.length})</h2>
-            </div>
-            {users.length > 0 ? (
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">
+            Users ({users.length})
+          </h2>
+          {users.length > 0 ? (
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         ID
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Created
                       </th>
                     </tr>
@@ -156,9 +173,15 @@ export default function Dashboard() {
                   <tbody className="divide-y divide-gray-200">
                     {users.map((user) => (
                       <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{user.name}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                          {user.id}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {user.name}
+                        </td>
                         <td className="px-6 py-4 text-sm">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Active
@@ -172,12 +195,12 @@ export default function Dashboard() {
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <div className="px-6 py-8 text-center text-gray-500">
-                No users yet. Create one to get started!
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="border border-gray-200 rounded-lg p-8 text-center">
+              <p className="text-gray-600 text-sm">No users yet. Create one to get started.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
