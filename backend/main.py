@@ -114,4 +114,4 @@ def db_status(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         return {"status": "connected", "message": "Database is connected"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")}
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
