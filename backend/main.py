@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from database import init_db, get_db
 from models import User, Session as DBSession
-from schemas import UserCreate, User as UserSchema
+from schemas import UserCreate, UserSignup, LoginRequest, LoginResponse, User as UserSchema
 from auth import verify_password, hash_password
 from datetime import datetime, timedelta, timezone
 import secrets
@@ -76,12 +76,34 @@ def health():
 
 
 # ── Auth / Login ──────────────────────────────────────────────────────────────
-class LoginRequest(BaseModel):
-    email: str
-    password: str
 
 
-@app.post("/api/auth/login", status_code=201)
+
+@app.post("/api/auth/signup", response_model=UserSchema, status_code=201)
+def signup(request: UserSignup, db: Session = Depends(get_db)):
+    """
+    Signup with email + password.
+    Create new user with hashed password.
+    """
+    existing = db.query(User).filter(User.email == request.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Hash password
+    password_hash = hash_password(request.password)
+    
+    db_user = User(
+        email=request.email,
+        name=request.name,
+        password_hash=password_hash,
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+@app.post("/api/auth/login", response_model=LoginResponse, status_code=200)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     """
     Login with email + password.
@@ -111,13 +133,14 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "session_id": db_session.id,
         "token": token,
         "expires_at": expires_at.isoformat(),
-        "user": {"id": user.id, "email": user.email, "name": user.name}
+        "user": UserSchema.model_validate(user)
     }
 
 
 # ── Users ─────────────────────────────────────────────────────────────────────
 @app.post("/api/users", response_model=UserSchema, status_code=201)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    """Create user with Google OAuth only (no password)"""
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
