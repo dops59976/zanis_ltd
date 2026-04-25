@@ -2,11 +2,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from database import init_db, get_db
 from models import User, Session as DBSession
 from schemas import UserCreate, User as UserSchema
+from auth import verify_password, hash_password
 from datetime import datetime, timedelta, timezone
 import secrets
 import logging
@@ -71,6 +73,46 @@ def read_root():
 @app.get("/health")
 def health():
     return {"message": "Welcome to Zanis LTD", "status": "ok"}
+
+
+# ── Auth / Login ──────────────────────────────────────────────────────────────
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/api/auth/login", status_code=201)
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """
+    Login with email + password.
+    Return session token.
+    """
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user or not user.password_hash:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Create session
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+    
+    db_session = DBSession(
+        user_id=user.id,
+        token=token,
+        expires_at=expires_at,
+    )
+    db.add(db_session)
+    db.commit()
+    db.refresh(db_session)
+    
+    return {
+        "session_id": db_session.id,
+        "token": token,
+        "expires_at": expires_at.isoformat(),
+        "user": {"id": user.id, "email": user.email, "name": user.name}
+    }
 
 
 # ── Users ─────────────────────────────────────────────────────────────────────
